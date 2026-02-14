@@ -50,7 +50,6 @@ body::before{
   inset:0;
 }
 
-/* Sfondo blur (riempie schermo) */
 .bg-carousel video.bg{
   position:absolute;
   inset:0;
@@ -63,7 +62,6 @@ body::before{
   transition: opacity 1.2s ease;
 }
 
-/* Video principale: NON TAGLIA */
 .bg-carousel video.fg{
   position:absolute;
   inset:0;
@@ -73,6 +71,7 @@ body::before{
   opacity:0;
   transition: opacity 1.2s ease;
 }
+
 .bg-carousel video.active{ opacity:1; }
 
 /* ====== CONTENUTI ====== */
@@ -94,7 +93,6 @@ body::before{
   text-align:center;
 }
 
-/* Testo CAPS: niente bordo nero */
 .title{
   margin:0;
   width:92vw;
@@ -104,14 +102,19 @@ body::before{
   text-transform:uppercase;
   font-size:clamp(24px, 6vw, 44px);
   line-height:1.18;
-
   text-shadow:
     0 3px 10px rgba(0,0,0,0.60),
     0 10px 28px rgba(0,0,0,0.55),
     0 0 32px rgba(0,0,0,0.35);
 }
 
-/* Bottoni */
+.buttons{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
 button{
   padding:16px 26px;
   font-size:18px;
@@ -131,31 +134,13 @@ button{
   background:#ff0055;
   color:#fff;
   box-shadow:0 0 24px rgba(255,0,85,.70);
-  transition: transform .25s ease, box-shadow .25s ease;
+  transition: transform .25s ease, box-shadow .25s ease, font-size .25s ease;
 }
 
 .no-button{
-  position:absolute; /* scappa */
   background:rgba(255,255,255,.14);
   color:#fff;
   border:1px solid rgba(255,255,255,.18);
-}
-
-/* Contenitore bottoni con spazio per far scappare NO */
-.buttons{
-  position:relative;
-  width:min(92vw, 520px);
-  height:140px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* posizione iniziale NO */
-.no-button{
-  right:0;
-  top:50%;
-  transform:translateY(-50%);
 }
 
 /* Messaggio finale */
@@ -169,12 +154,10 @@ button{
   font-weight:900;
   letter-spacing:0.06em;
   text-transform:uppercase;
-
   text-shadow:
     0 3px 10px rgba(0,0,0,0.62),
     0 12px 30px rgba(0,0,0,0.55),
     0 0 34px rgba(0,0,0,0.35);
-
   animation: fadeIn 1.1s ease forwards;
   opacity:0;
 }
@@ -329,7 +312,7 @@ function startCarousel(){
   }, 1200);
 }
 
-/* ====== NO SCAPPA + SI CRESCE ====== */
+/* ====== NO: cambia testo + SI cresce ====== */
 let messageIndex = 0;
 let scaleSize = 1;
 
@@ -341,23 +324,6 @@ const messages = [
   "LO SAPPIAMO ENTRAMBI 💕"
 ];
 
-function moveNoButton(){
-  const noButton = document.querySelector(".no-button");
-  const box = document.querySelector(".buttons");
-
-  const pad = 8;
-  const maxX = box.clientWidth - noButton.offsetWidth - pad;
-  const maxY = box.clientHeight - noButton.offsetHeight - pad;
-
-  const x = Math.max(pad, Math.random() * maxX);
-  const y = Math.max(pad, Math.random() * maxY);
-
-  noButton.style.left = x + "px";
-  noButton.style.top = y + "px";
-  noButton.style.right = "auto";
-  noButton.style.transform = "translate(0,0)";
-}
-
 function handleNoClick(){
   const noButton = document.querySelector(".no-button");
   const yesButton = document.querySelector(".yes-button");
@@ -365,17 +331,11 @@ function handleNoClick(){
   noButton.textContent = messages[messageIndex];
   messageIndex = (messageIndex + 1) % messages.length;
 
-  moveNoButton();
-
   scaleSize += 0.18;
   const s = Math.min(scaleSize, 2.6);
   yesButton.style.transform = `scale(${s})`;
   yesButton.style.boxShadow = `0 0 ${24*s}px rgba(255,0,85,0.85)`;
 }
-
-/* scappa prima del click (mobile + desktop) */
-document.querySelector(".no-button").addEventListener("touchstart", handleNoClick, { passive:true });
-document.querySelector(".no-button").addEventListener("mouseover", handleNoClick);
 
 /* ====== YES CLICK ====== */
 function handleYesClick(){
