@@ -15,82 +15,110 @@
 
 *{ box-sizing:border-box; }
 
-html,body{
-  height:100%;
-}
+html, body { height:100%; }
 
 body{
   margin:0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Arial, sans-serif;
-  color:white;
   overflow:hidden;
   position:relative;
+  color:#fff;
 
-  /* iOS-friendly background (NO fixed) */
+  /* Font super leggibile */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+               "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Se vuoi usare l'immagine iniziale prima del click */
   background: url("sfondo.jpg") center/cover no-repeat;
+  background-color:#000;
 }
 
-/* Overlay */
+/* Overlay leggero per leggibilità testo (senza box) */
 body::before{
   content:"";
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.45);
+  background: rgba(0,0,0,0.18); /* basso: video visibili */
   z-index:1;
 }
 
-/* Video background */
+/* VIDEO CAROUSEL */
 .bg-carousel{
   position:fixed;
   inset:0;
   z-index:0;
-  display:none; /* nascosto all'inizio */
+  display:none;
   background:#000;
 }
-.bg-carousel video{
+.bg-carousel .layer{
+  position:absolute;
+  inset:0;
+}
+
+/* Sfondo blur (riempie schermo) */
+.bg-carousel video.bg{
   position:absolute;
   inset:0;
   width:100%;
   height:100%;
   object-fit:cover;
+  filter: blur(18px) brightness(0.78);
+  transform: scale(1.08);
   opacity:0;
-  transition:opacity 1.2s ease;
-  transform: translateZ(0); /* iOS smooth */
+  transition: opacity 1.2s ease;
 }
+
+/* Foreground: mostra tutto (NO TAGLIO) */
+.bg-carousel video.fg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  opacity:0;
+  transition: opacity 1.2s ease;
+}
+
 .bg-carousel video.active{
   opacity:1;
 }
 
-/* Contenuti */
-#main, #finalMessage{
+/* CONTENUTI */
+.screen{
   position:relative;
   z-index:2;
-  text-align:center;
-}
-
-.container{
   min-height: 100dvh;
-  min-height: 100vh; /* fallback */
+  min-height: 100vh;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   padding:
-    calc(24px + var(--safe-top))
+    calc(22px + var(--safe-top))
     calc(18px + var(--safe-right))
-    calc(24px + var(--safe-bottom))
+    calc(22px + var(--safe-bottom))
     calc(18px + var(--safe-left));
   gap:16px;
+  text-align:center;
 }
 
-h2{
+/* Testo in CAPS con bordo nero */
+.title{
   margin:0;
-  width:min(92vw, 720px);
-  font-size:clamp(20px, 5.4vw, 34px);
-  line-height:1.25;
-  text-shadow: 0 6px 24px rgba(0,0,0,.55);
+  width:min(92vw, 760px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: clamp(22px, 5.6vw, 40px);
+  line-height: 1.15;
+
+  /* Bordo nero (webkit stroke) + ombra per compatibilità */
+  -webkit-text-stroke: 2px rgba(0,0,0,0.85);
+  text-shadow:
+    0 2px 0 rgba(0,0,0,0.85),
+    0 6px 18px rgba(0,0,0,0.55);
 }
 
+/* Bottoni touch-friendly */
 .buttons{
   display:flex;
   gap:12px;
@@ -104,36 +132,47 @@ button{
   border:none;
   border-radius:999px;
   cursor:pointer;
-  margin:0;
   min-width:120px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .yes-button{
   background:#ff0055;
   color:white;
-  box-shadow:0 0 20px rgba(255,0,85,.65);
+  box-shadow:0 0 22px rgba(255,0,85,.65);
 }
 
 .no-button{
-  background:rgba(255,255,255,.12);
+  background:rgba(255,255,255,.14);
   color:white;
   border:1px solid rgba(255,255,255,.18);
 }
 
-/* Messaggio finale */
+/* Messaggio finale: senza box, solo testo centrato */
 #finalMessage{
   display:none;
-  width:min(92vw,720px);
-  margin:0 auto;
-  padding:22px 18px;
-  font-size:clamp(18px,4.7vw,26px);
-  line-height:1.7;
-  text-align:left;
-  background:rgba(0,0,0,0.55);
-  border-radius:18px;
-  animation:fadeIn 1.3s ease forwards;
+}
+
+.finalText{
+  width:min(92vw, 760px);
+  font-size: clamp(18px, 4.6vw, 28px);
+  line-height: 1.65;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align:center;
+
+  -webkit-text-stroke: 1.6px rgba(0,0,0,0.85);
+  text-shadow:
+    0 2px 0 rgba(0,0,0,0.85),
+    0 10px 22px rgba(0,0,0,0.55);
+
+  animation: fadeIn 1.2s ease forwards;
+  opacity:0;
 }
 
 @keyframes fadeIn{
@@ -145,16 +184,17 @@ button{
 .heart{
   position:fixed;
   top:-12vh;
-  color:#ff4d88;
   z-index:3;
   pointer-events:none;
   will-change: transform;
-  animation:fall linear infinite;
+  color:#ff4d88;
   text-shadow: 0 6px 18px rgba(0,0,0,.35);
+  animation: fall linear infinite;
 }
+
 @keyframes fall{
-  0%{transform:translateY(-10vh);}
-  100%{transform:translateY(120vh);}
+  0%{ transform: translateY(-10vh); }
+  100%{ transform: translateY(120vh); }
 }
 </style>
 </head>
@@ -163,124 +203,152 @@ button{
 
 <!-- VIDEO CAROUSEL -->
 <div class="bg-carousel" id="bgCarousel">
-  <video id="videoA" muted loop playsinline preload="auto"></video>
-  <video id="videoB" muted loop playsinline preload="auto"></video>
-</div>
-
-<div class="container" id="main">
-  <h2>Posso avere il privilegio di chiamarti Amore mio? 🥺💞</h2>
-  <div class="buttons">
-    <button class="yes-button" onclick="handleYesClick()">Sì</button>
-    <button class="no-button" onclick="handleNoClick()">No</button>
+  <div class="layer" id="layerA">
+    <video id="bgA" class="bg" muted loop playsinline preload="auto"></video>
+    <video id="fgA" class="fg" muted loop playsinline preload="auto"></video>
+  </div>
+  <div class="layer" id="layerB">
+    <video id="bgB" class="bg" muted loop playsinline preload="auto"></video>
+    <video id="fgB" class="fg" muted loop playsinline preload="auto"></video>
   </div>
 </div>
 
-<div class="container" id="finalMessage">
-  ✨ <b>Daria…</b><br><br>
-  Per me sei speciale.<br>
-  Il tuo nome non è solo un suono…<br>
-  è qualcosa che sento dentro. 💘<br><br>
-  È casa. È battito. È luce.<br><br>
-  Mi fai emozionare.<br>
-  Mi regali sorrisi improvvisi<br>
-  e un amore che cresce ogni giorno. ❤️<br><br>
-  Perché sceglierti…<br>
-  è la cosa più bella che potessi fare.<br><br>
-  E questo, Daria…<br>
-  è la cosa più naturale per me. 🔥
+<!-- SCHERMATA INIZIALE -->
+<div class="screen" id="main">
+  <h2 class="title">POSSO AVERE IL PRIVILEGIO DI CHIAMARTI AMORE MIO? 🥺💞</h2>
+  <div class="buttons">
+    <button class="yes-button" onclick="handleYesClick()">SÌ</button>
+    <button class="no-button" onclick="handleNoClick()">NO</button>
+  </div>
 </div>
 
+<!-- MESSAGGIO FINALE -->
+<div class="screen" id="finalMessage">
+  <div class="finalText">
+    ✨ DARIA…<br><br>
+    PER ME SEI SPECIALE.<br>
+    IL TUO NOME NON È SOLO UN SUONO…<br>
+    È QUALCOSA CHE SENTO DENTRO. 💘<br><br>
+    È CASA. È BATTITO. È LUCE.<br><br>
+    MI FAI EMOZIONARE.<br>
+    MI REGALI SORRISI IMPROVVISI<br>
+    E UN AMORE CHE CRESCE OGNI GIORNO. ❤️<br><br>
+    PERCHÉ SCEGLIERTI…<br>
+    È LA COSA PIÙ BELLA CHE POTESSI FARE.<br><br>
+    E QUESTO, DARIA…<br>
+    È LA COSA PIÙ NATURALE PER ME. 🔥
+  </div>
+</div>
+
+<!-- MUSICA -->
 <audio id="bgMusic" preload="auto" loop>
   <source src="musica.mp3" type="audio/mpeg">
 </audio>
 
 <script>
+/* ====== VIDEO CAROUSEL (NO TAGLIO) + BLUR BG ====== */
 const videos = ["video1.mp4","video2.mp4","video3.mp4","video4.mp4"];
-const vA = document.getElementById("videoA");
-const vB = document.getElementById("videoB");
-let active = vA;
-let idle = vB;
-let index = 0;
 
-function setVideo(el, src){
-  el.src = src;
-  el.load();
-  // iOS: play solo dopo interazione, ma qui avviene dopo il tap su "Sì"
-  el.play().catch(()=>{});
+const bgA = document.getElementById("bgA");
+const fgA = document.getElementById("fgA");
+const bgB = document.getElementById("bgB");
+const fgB = document.getElementById("fgB");
+
+let active = { bg: bgA, fg: fgA };
+let idle   = { bg: bgB, fg: fgB };
+let index = 0;
+let timer = null;
+
+function setPair(pair, src){
+  pair.bg.src = src;
+  pair.fg.src = src;
+  pair.bg.load(); pair.fg.load();
+
+  // iPhone: play solo dopo interazione -> qui parte dopo il tap su "SÌ"
+  pair.bg.play().catch(()=>{});
+  pair.fg.play().catch(()=>{});
+}
+
+function setActive(pair, isActive){
+  pair.bg.classList.toggle("active", isActive);
+  pair.fg.classList.toggle("active", isActive);
 }
 
 function switchVideo(){
   index = (index + 1) % videos.length;
-  setVideo(idle, videos[index]);
+  setPair(idle, videos[index]);
 
-  idle.oncanplay = () => {
-    active.classList.remove("active");
-    idle.classList.add("active");
+  idle.fg.oncanplay = () => {
+    setActive(active, false);
+    setActive(idle, true);
 
-    const temp = active;
-    active = idle;
-    idle = temp;
+    // swap
+    const temp = active; active = idle; idle = temp;
 
-    idle.pause();
-    idle.currentTime = 0;
-    idle.oncanplay = null;
+    // reset idle
+    idle.bg.pause(); idle.fg.pause();
+    idle.bg.currentTime = 0; idle.fg.currentTime = 0;
+    idle.fg.oncanplay = null;
   };
 }
 
-let carouselTimer = null;
+function startCarousel(){
+  document.getElementById("bgCarousel").style.display = "block";
+  setPair(active, videos[0]);
+  setActive(active, true);
 
+  if(!timer) timer = setInterval(switchVideo, 10000);
+}
+
+/* ====== NO BUTTON TEASE ====== */
 let messageIndex = 0;
 const messages = [
-  "Sei sicura? 😏",
-  "Davvero vuoi dire di no? 😌",
-  "Non puoi resistermi 💋",
-  "Ultima possibilità... 😈",
-  "Lo sappiamo entrambi 💕"
+  "SEI SICURA? 😏",
+  "DAVVERO VUOI DIRE DI NO? 😌",
+  "NON PUOI RESISTERMI 💋",
+  "ULTIMA POSSIBILITÀ... 😈",
+  "LO SAPPIAMO ENTRAMBI 💕"
 ];
 
 function handleNoClick(){
   const noButton = document.querySelector(".no-button");
   const yesButton = document.querySelector(".yes-button");
+
   noButton.textContent = messages[messageIndex];
   messageIndex = (messageIndex + 1) % messages.length;
 
   const current = parseFloat(getComputedStyle(yesButton).fontSize);
-  yesButton.style.fontSize = Math.min(current * 1.18, 34) + "px"; // limite iPhone
+  yesButton.style.fontSize = Math.min(current * 1.16, 34) + "px";
 }
 
+/* ====== YES CLICK ====== */
 function handleYesClick(){
-  // Mostra video
-  document.getElementById("bgCarousel").style.display = "block";
-  setVideo(active, videos[0]);
-  active.classList.add("active");
+  // Background nero (toglie la foto iniziale)
+  document.body.style.background = "#000";
 
-  // Avvia carousel solo dopo click (iOS friendly)
-  if(!carouselTimer){
-    carouselTimer = setInterval(switchVideo, 10000);
-  }
+  // Video carousel
+  startCarousel();
 
-  // Mostra messaggio
+  // Schermate
   document.getElementById("main").style.display = "none";
   document.getElementById("finalMessage").style.display = "flex";
 
-  // Musica (parte dopo tap, quindi ok su iPhone)
+  // Musica (parte dopo tap -> OK su iPhone)
   const music = document.getElementById("bgMusic");
   music.currentTime = 44;
   music.volume = 0.6;
   music.play().catch(()=>{});
 
-  // Cuori
-  for(let i=0;i<60;i++){
+  // Cuori (leggeri + pulizia)
+  for(let i=0;i<55;i++){
     const heart = document.createElement("div");
     heart.className="heart";
     heart.textContent="❤";
     heart.style.left = (Math.random()*100) + "vw";
     heart.style.animationDuration = (Math.random()*4+3) + "s";
-    heart.style.fontSize = (Math.random()*20+22) + "px";
+    heart.style.fontSize = (Math.random()*18+20) + "px";
     heart.style.opacity = (Math.random()*0.5+0.5);
     document.body.appendChild(heart);
-
-    // pulizia dopo un po' (per non pesare su iPhone)
     setTimeout(()=>heart.remove(), 12000);
   }
 }
