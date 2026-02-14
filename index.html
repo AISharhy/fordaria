@@ -24,17 +24,17 @@ body{
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
                "Segoe UI", Roboto, Arial, sans-serif;
 
-  /* Schermata iniziale (opzionale) */
+  /* Schermata iniziale opzionale */
   background: url("sfondo.jpg") center/cover no-repeat;
   background-color:#000;
 }
 
-/* Overlay leggerissimo: aumenta leggibilità senza “spegnere” i video */
+/* Overlay leggero: aiuta la leggibilità ma lascia visibili i video */
 body::before{
   content:"";
   position:fixed;
   inset:0;
-  background: rgba(0,0,0,0.10);
+  background: rgba(0,0,0,0.12);
   z-index:1;
 }
 
@@ -51,7 +51,7 @@ body::before{
   inset:0;
 }
 
-/* BG blur: riempie */
+/* Sfondo blur (riempie schermo) */
 .bg-carousel video.bg{
   position:absolute;
   inset:0;
@@ -64,7 +64,7 @@ body::before{
   transition: opacity 1.2s ease;
 }
 
-/* FG: NO TAGLIO */
+/* Video principale: NON TAGLIA */
 .bg-carousel video.fg{
   position:absolute;
   inset:0;
@@ -92,11 +92,11 @@ body::before{
     calc(18px + var(--safe-right))
     calc(22px + var(--safe-bottom))
     calc(18px + var(--safe-left));
-  gap:28px;
+  gap:26px;
   text-align:center;
 }
 
-/* Titolo CAPS + bordo nero forte */
+/* Testo CAPS: niente bordo nero, solo shadow morbida */
 .title{
   margin:0;
   width:92vw;
@@ -107,14 +107,12 @@ body::before{
   font-size:clamp(24px, 6vw, 44px);
   line-height:1.18;
 
-  -webkit-text-stroke: 2.5px rgba(0,0,0,0.95);
   text-shadow:
-    0 4px 0 rgba(0,0,0,0.9),
-    0 10px 26px rgba(0,0,0,0.75),
-    0 0 34px rgba(0,0,0,0.55);
+    0 3px 10px rgba(0,0,0,0.60),
+    0 10px 28px rgba(0,0,0,0.55),
+    0 0 32px rgba(0,0,0,0.35);
 }
 
-/* Bottoni */
 .buttons{
   display:flex;
   gap:12px;
@@ -149,7 +147,7 @@ button{
   border:1px solid rgba(255,255,255,.18);
 }
 
-/* Messaggio finale: SOLO testo, niente box */
+/* Messaggio finale: solo testo, niente box */
 #finalMessage{ display:none; }
 
 .finalText{
@@ -161,11 +159,10 @@ button{
   letter-spacing:0.06em;
   text-transform:uppercase;
 
-  -webkit-text-stroke: 2.2px rgba(0,0,0,0.95);
   text-shadow:
-    0 4px 0 rgba(0,0,0,0.9),
-    0 12px 28px rgba(0,0,0,0.75),
-    0 0 36px rgba(0,0,0,0.55);
+    0 3px 10px rgba(0,0,0,0.62),
+    0 12px 30px rgba(0,0,0,0.55),
+    0 0 34px rgba(0,0,0,0.35);
 
   animation: fadeIn 1.1s ease forwards;
   opacity:0;
@@ -199,12 +196,12 @@ button{
 <!-- VIDEO CAROUSEL -->
 <div class="bg-carousel" id="bgCarousel">
   <div class="layer" id="layerA">
-    <video id="bgA" class="bg" muted loop playsinline preload="auto"></video>
-    <video id="fgA" class="fg" muted loop playsinline preload="auto"></video>
+    <video id="bgA" class="bg" muted loop playsinline autoplay preload="auto"></video>
+    <video id="fgA" class="fg" muted loop playsinline autoplay preload="auto"></video>
   </div>
   <div class="layer" id="layerB">
-    <video id="bgB" class="bg" muted loop playsinline preload="auto"></video>
-    <video id="fgB" class="fg" muted loop playsinline preload="auto"></video>
+    <video id="bgB" class="bg" muted loop playsinline autoplay preload="auto"></video>
+    <video id="fgB" class="fg" muted loop playsinline autoplay preload="auto"></video>
   </div>
 </div>
 
@@ -223,15 +220,15 @@ button{
     ✨ DARIA…<br><br>
     PER ME SEI SPECIALE.<br>
     IL TUO NOME NON È SOLO UN SUONO…<br>
-    È QUALCOSA CHE SENTO DENTRO. <br><br>
+    È QUALCOSA CHE SENTO DENTRO. 💘<br><br>
     È CASA. È BATTITO. È LUCE.<br><br>
     MI FAI EMOZIONARE.<br>
     MI REGALI SORRISI IMPROVVISI<br>
-    E UN AMORE CHE CRESCE OGNI GIORNO.  <br><br>
+    E UN AMORE CHE CRESCE OGNI GIORNO. ❤️<br><br>
     PERCHÉ SCEGLIERTI…<br>
     È LA COSA PIÙ BELLA CHE POTESSI FARE.<br><br>
     E QUESTO, DARIA…<br>
-    È LA COSA PIÙ NATURALE PER ME. 
+    È LA COSA PIÙ NATURALE PER ME. 🔥
   </div>
 </div>
 
@@ -242,9 +239,10 @@ button{
 
 <script>
 /* ====== CONFIG ====== */
-const videos = ["Video1.mp4","Video2.mp4","Video3.mp4","Video4.mp4"]; // cambia nomi se diversi
-const MUSIC_START_AT = 44; // secondi
-const SWITCH_EVERY_MS = 10000;
+/* ATTENZIONE: nomi con V MAIUSCOLA come nel tuo repo */
+const videos = ["video1.mp4","video2.mp4","video3.mp4","video4.mp4"]; // cambia ordine se vuoi
+const MUSIC_START_AT = 44;     // secondi
+const SWITCH_EVERY_MS = 10000; // cambio video
 
 /* ====== VIDEO ELEMENTS ====== */
 const bgA = document.getElementById("bgA");
@@ -257,14 +255,19 @@ let idle   = { bg: bgB, fg: fgB };
 let index = 0;
 let timer = null;
 
+function forcePlay(v){
+  v.muted = true;
+  v.playsInline = true;
+  const p = v.play();
+  if (p && p.catch) p.catch(()=>{});
+}
+
 function setPair(pair, src){
   pair.bg.src = src;
   pair.fg.src = src;
   pair.bg.load(); pair.fg.load();
-
-  // iPhone: play funziona dopo tap (qui siamo dentro il click su SÌ)
-  pair.bg.play().catch(()=>{});
-  pair.fg.play().catch(()=>{});
+  forcePlay(pair.bg);
+  forcePlay(pair.fg);
 }
 
 function setActive(pair, isActive){
@@ -276,32 +279,47 @@ function switchVideo(){
   index = (index + 1) % videos.length;
   setPair(idle, videos[index]);
 
-  // quando il foreground è pronto, switcho
   idle.fg.oncanplay = () => {
     setActive(active, false);
     setActive(idle, true);
 
-    // swap
+    forcePlay(idle.bg);
+    forcePlay(idle.fg);
+
     const temp = active; active = idle; idle = temp;
 
-    // reset idle
     idle.bg.pause(); idle.fg.pause();
     idle.bg.currentTime = 0; idle.fg.currentTime = 0;
     idle.fg.oncanplay = null;
   };
 }
 
+/* iPhone fix: mostro il primo video SOLO quando è pronto */
 function startCarousel(){
-  const c = document.getElementById("bgCarousel");
-  c.style.display = "block";
-
+  document.getElementById("bgCarousel").style.display = "block";
   setPair(active, videos[0]);
-  setActive(active, true);
 
-  if(!timer) timer = setInterval(switchVideo, SWITCH_EVERY_MS);
+  active.fg.oncanplay = () => {
+    setActive(active, true);
+    forcePlay(active.bg);
+    forcePlay(active.fg);
+    active.fg.oncanplay = null;
+
+    if(!timer) timer = setInterval(switchVideo, SWITCH_EVERY_MS);
+  };
+
+  // fallback Safari
+  setTimeout(() => {
+    if(!active.fg.classList.contains("active")){
+      setActive(active, true);
+      forcePlay(active.bg);
+      forcePlay(active.fg);
+      if(!timer) timer = setInterval(switchVideo, SWITCH_EVERY_MS);
+    }
+  }, 1200);
 }
 
-/* ====== NO BUTTON TEASE ====== */
+/* ====== NO BUTTON ====== */
 let messageIndex = 0;
 const messages = [
   "SEI SICURA? 😏",
@@ -327,20 +345,20 @@ function handleYesClick(){
   // togli sfondo immagine iniziale
   document.body.style.background = "#000";
 
-  // video
+  // avvia video
   startCarousel();
 
   // schermate
   document.getElementById("main").style.display = "none";
   document.getElementById("finalMessage").style.display = "flex";
 
-  // musica (iPhone OK: parte dopo tap)
+  // musica (parte dopo tap, ok iPhone)
   const music = document.getElementById("bgMusic");
   music.currentTime = MUSIC_START_AT;
   music.volume = 0.6;
   music.play().catch(()=>{});
 
-  // cuori (leggeri + pulizia)
+  // cuori
   for(let i=0;i<55;i++){
     const heart = document.createElement("div");
     heart.className = "heart";
@@ -352,6 +370,12 @@ function handleYesClick(){
     document.body.appendChild(heart);
     setTimeout(()=>heart.remove(), 12000);
   }
+
+  // extra-fallback: un tocco dopo avvia sempre (Safari)
+  document.body.addEventListener("touchend", () => {
+    forcePlay(active.bg);
+    forcePlay(active.fg);
+  }, { once:true });
 }
 </script>
 
