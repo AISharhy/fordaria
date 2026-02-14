@@ -1,18 +1,33 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Solo per Daria</title>
 
 <style>
+:root{
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  height:100%;
+}
+
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Arial, sans-serif;
   color:white;
   overflow:hidden;
   position:relative;
-  background:url("sfondo.jpg") center/cover no-repeat fixed;
+
+  /* iOS-friendly background (NO fixed) */
+  background: url("sfondo.jpg") center/cover no-repeat;
 }
 
 /* Overlay */
@@ -30,14 +45,17 @@ body::before{
   inset:0;
   z-index:0;
   display:none; /* nascosto all'inizio */
+  background:#000;
 }
 .bg-carousel video{
   position:absolute;
+  inset:0;
   width:100%;
   height:100%;
   object-fit:cover;
   opacity:0;
   transition:opacity 1.2s ease;
+  transform: translateZ(0); /* iOS smooth */
 }
 .bg-carousel video.active{
   opacity:1;
@@ -50,56 +68,93 @@ body::before{
   text-align:center;
 }
 
-.container{ margin-top:120px; }
+.container{
+  min-height: 100dvh;
+  min-height: 100vh; /* fallback */
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:
+    calc(24px + var(--safe-top))
+    calc(18px + var(--safe-right))
+    calc(24px + var(--safe-bottom))
+    calc(18px + var(--safe-left));
+  gap:16px;
+}
+
+h2{
+  margin:0;
+  width:min(92vw, 720px);
+  font-size:clamp(20px, 5.4vw, 34px);
+  line-height:1.25;
+  text-shadow: 0 6px 24px rgba(0,0,0,.55);
+}
+
+.buttons{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
 
 button{
-  padding:12px 25px;
+  padding:14px 22px;
   font-size:18px;
   border:none;
-  border-radius:30px;
+  border-radius:999px;
   cursor:pointer;
-  margin:10px;
+  margin:0;
+  min-width:120px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .yes-button{
   background:#ff0055;
   color:white;
-  box-shadow:0 0 20px #ff0055;
+  box-shadow:0 0 20px rgba(255,0,85,.65);
 }
 
 .no-button{
-  background:#444;
+  background:rgba(255,255,255,.12);
   color:white;
+  border:1px solid rgba(255,255,255,.18);
 }
 
 /* Messaggio finale */
 #finalMessage{
   display:none;
   width:min(92vw,720px);
-  margin:40px auto;
-  padding:24px;
-  font-size:clamp(18px,3.8vw,26px);
+  margin:0 auto;
+  padding:22px 18px;
+  font-size:clamp(18px,4.7vw,26px);
   line-height:1.7;
   text-align:left;
   background:rgba(0,0,0,0.55);
   border-radius:18px;
-  animation:fadeIn 2s ease forwards;
+  animation:fadeIn 1.3s ease forwards;
 }
 
 @keyframes fadeIn{
-  from{opacity:0;}
-  to{opacity:1;}
+  from{opacity:0; transform: translateY(10px);}
+  to{opacity:1; transform: translateY(0);}
 }
 
 /* Cuori */
 .heart{
-  position:absolute;
+  position:fixed;
+  top:-12vh;
   color:#ff4d88;
+  z-index:3;
+  pointer-events:none;
+  will-change: transform;
   animation:fall linear infinite;
+  text-shadow: 0 6px 18px rgba(0,0,0,.35);
 }
 @keyframes fall{
   0%{transform:translateY(-10vh);}
-  100%{transform:translateY(110vh);}
+  100%{transform:translateY(120vh);}
 }
 </style>
 </head>
@@ -108,29 +163,31 @@ button{
 
 <!-- VIDEO CAROUSEL -->
 <div class="bg-carousel" id="bgCarousel">
-  <video id="videoA" muted loop playsinline></video>
-  <video id="videoB" muted loop playsinline></video>
+  <video id="videoA" muted loop playsinline preload="auto"></video>
+  <video id="videoB" muted loop playsinline preload="auto"></video>
 </div>
 
 <div class="container" id="main">
   <h2>Posso avere il privilegio di chiamarti Amore mio? 🥺💞</h2>
-  <button class="yes-button" onclick="handleYesClick()">Sì</button>
-  <button class="no-button" onclick="handleNoClick()">No</button>
+  <div class="buttons">
+    <button class="yes-button" onclick="handleYesClick()">Sì</button>
+    <button class="no-button" onclick="handleNoClick()">No</button>
+  </div>
 </div>
 
-<div id="finalMessage">
-✨ <b>Daria…</b><br><br>
-Per me sei speciale.<br>
-Il tuo nome non è solo un suono…<br>
-è qualcosa che sento dentro. 💘<br><br>
-È casa. È battito. È luce.<br><br>
-Mi fai emozionare.<br>
-Mi regali sorrisi improvvisi<br>
-e un amore che cresce ogni giorno. ❤️<br><br>
-Perché sceglierti…<br>
-è la cosa più bella che potessi fare.<br><br>
-E questo, Daria…<br>
-è la cosa più naturale per me. 🔥
+<div class="container" id="finalMessage">
+  ✨ <b>Daria…</b><br><br>
+  Per me sei speciale.<br>
+  Il tuo nome non è solo un suono…<br>
+  è qualcosa che sento dentro. 💘<br><br>
+  È casa. È battito. È luce.<br><br>
+  Mi fai emozionare.<br>
+  Mi regali sorrisi improvvisi<br>
+  e un amore che cresce ogni giorno. ❤️<br><br>
+  Perché sceglierti…<br>
+  è la cosa più bella che potessi fare.<br><br>
+  E questo, Daria…<br>
+  è la cosa più naturale per me. 🔥
 </div>
 
 <audio id="bgMusic" preload="auto" loop>
@@ -148,6 +205,7 @@ let index = 0;
 function setVideo(el, src){
   el.src = src;
   el.load();
+  // iOS: play solo dopo interazione, ma qui avviene dopo il tap su "Sì"
   el.play().catch(()=>{});
 }
 
@@ -165,10 +223,11 @@ function switchVideo(){
 
     idle.pause();
     idle.currentTime = 0;
+    idle.oncanplay = null;
   };
 }
 
-setInterval(switchVideo, 10000);
+let carouselTimer = null;
 
 let messageIndex = 0;
 const messages = [
@@ -184,24 +243,27 @@ function handleNoClick(){
   const yesButton = document.querySelector(".yes-button");
   noButton.textContent = messages[messageIndex];
   messageIndex = (messageIndex + 1) % messages.length;
-  yesButton.style.fontSize =
-    (parseFloat(window.getComputedStyle(yesButton).fontSize) * 1.3) + "px";
+
+  const current = parseFloat(getComputedStyle(yesButton).fontSize);
+  yesButton.style.fontSize = Math.min(current * 1.18, 34) + "px"; // limite iPhone
 }
 
 function handleYesClick(){
-  // Nasconde immagine iniziale
-  document.body.style.background = "black";
-
   // Mostra video
   document.getElementById("bgCarousel").style.display = "block";
   setVideo(active, videos[0]);
   active.classList.add("active");
 
+  // Avvia carousel solo dopo click (iOS friendly)
+  if(!carouselTimer){
+    carouselTimer = setInterval(switchVideo, 10000);
+  }
+
   // Mostra messaggio
   document.getElementById("main").style.display = "none";
-  document.getElementById("finalMessage").style.display = "block";
+  document.getElementById("finalMessage").style.display = "flex";
 
-  // Musica
+  // Musica (parte dopo tap, quindi ok su iPhone)
   const music = document.getElementById("bgMusic");
   music.currentTime = 44;
   music.volume = 0.6;
@@ -209,13 +271,17 @@ function handleYesClick(){
 
   // Cuori
   for(let i=0;i<60;i++){
-    let heart=document.createElement("div");
+    const heart = document.createElement("div");
     heart.className="heart";
-    heart.innerHTML="❤";
-    heart.style.left=Math.random()*100+"vw";
-    heart.style.animationDuration=(Math.random()*4+3)+"s";
-    heart.style.fontSize=(Math.random()*20+25)+"px";
+    heart.textContent="❤";
+    heart.style.left = (Math.random()*100) + "vw";
+    heart.style.animationDuration = (Math.random()*4+3) + "s";
+    heart.style.fontSize = (Math.random()*20+22) + "px";
+    heart.style.opacity = (Math.random()*0.5+0.5);
     document.body.appendChild(heart);
+
+    // pulizia dopo un po' (per non pesare su iPhone)
+    setTimeout(()=>heart.remove(), 12000);
   }
 }
 </script>
