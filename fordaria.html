@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solo per Daria</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  color:white;
+  overflow:hidden;
+  position:relative;
+  background:url("sfondo.jpg") center/cover no-repeat fixed;
+}
+
+/* Overlay */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  z-index:1;
+}
+
+/* Video background */
+.bg-carousel{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  display:none; /* nascosto all'inizio */
+}
+.bg-carousel video{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+.bg-carousel video.active{
+  opacity:1;
+}
+
+/* Contenuti */
+#main, #finalMessage{
+  position:relative;
+  z-index:2;
+  text-align:center;
+}
+
+.container{ margin-top:120px; }
+
+button{
+  padding:12px 25px;
+  font-size:18px;
+  border:none;
+  border-radius:30px;
+  cursor:pointer;
+  margin:10px;
+}
+
+.yes-button{
+  background:#ff0055;
+  color:white;
+  box-shadow:0 0 20px #ff0055;
+}
+
+.no-button{
+  background:#444;
+  color:white;
+}
+
+/* Messaggio finale */
+#finalMessage{
+  display:none;
+  width:min(92vw,720px);
+  margin:40px auto;
+  padding:24px;
+  font-size:clamp(18px,3.8vw,26px);
+  line-height:1.7;
+  text-align:left;
+  background:rgba(0,0,0,0.55);
+  border-radius:18px;
+  animation:fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+
+/* Cuori */
+.heart{
+  position:absolute;
+  color:#ff4d88;
+  animation:fall linear infinite;
+}
+@keyframes fall{
+  0%{transform:translateY(-10vh);}
+  100%{transform:translateY(110vh);}
+}
+</style>
+</head>
+
+<body>
+
+<!-- VIDEO CAROUSEL -->
+<div class="bg-carousel" id="bgCarousel">
+  <video id="videoA" muted loop playsinline></video>
+  <video id="videoB" muted loop playsinline></video>
+</div>
+
+<div class="container" id="main">
+  <h2>Posso avere il privilegio di chiamarti Amore mio? 🥺💞</h2>
+  <button class="yes-button" onclick="handleYesClick()">Sì</button>
+  <button class="no-button" onclick="handleNoClick()">No</button>
+</div>
+
+<div id="finalMessage">
+✨ <b>Daria…</b><br><br>
+Per me sei speciale.<br>
+Il tuo nome non è solo un suono…<br>
+è qualcosa che sento dentro. 💘<br><br>
+È casa. È battito. È luce.<br><br>
+Mi fai emozionare.<br>
+Mi regali sorrisi improvvisi<br>
+e un amore che cresce ogni giorno. ❤️<br><br>
+Perché sceglierti…<br>
+è la cosa più bella che potessi fare.<br><br>
+E questo, Daria…<br>
+è la cosa più naturale per me. 🔥
+</div>
+
+<audio id="bgMusic" preload="auto" loop>
+  <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const videos = ["video1.mp4","video2.mp4","video3.mp4","video4.mp4"];
+const vA = document.getElementById("videoA");
+const vB = document.getElementById("videoB");
+let active = vA;
+let idle = vB;
+let index = 0;
+
+function setVideo(el, src){
+  el.src = src;
+  el.load();
+  el.play().catch(()=>{});
+}
+
+function switchVideo(){
+  index = (index + 1) % videos.length;
+  setVideo(idle, videos[index]);
+
+  idle.oncanplay = () => {
+    active.classList.remove("active");
+    idle.classList.add("active");
+
+    const temp = active;
+    active = idle;
+    idle = temp;
+
+    idle.pause();
+    idle.currentTime = 0;
+  };
+}
+
+setInterval(switchVideo, 10000);
+
+let messageIndex = 0;
+const messages = [
+  "Sei sicura? 😏",
+  "Davvero vuoi dire di no? 😌",
+  "Non puoi resistermi 💋",
+  "Ultima possibilità... 😈",
+  "Lo sappiamo entrambi 💕"
+];
+
+function handleNoClick(){
+  const noButton = document.querySelector(".no-button");
+  const yesButton = document.querySelector(".yes-button");
+  noButton.textContent = messages[messageIndex];
+  messageIndex = (messageIndex + 1) % messages.length;
+  yesButton.style.fontSize =
+    (parseFloat(window.getComputedStyle(yesButton).fontSize) * 1.3) + "px";
+}
+
+function handleYesClick(){
+  // Nasconde immagine iniziale
+  document.body.style.background = "black";
+
+  // Mostra video
+  document.getElementById("bgCarousel").style.display = "block";
+  setVideo(active, videos[0]);
+  active.classList.add("active");
+
+  // Mostra messaggio
+  document.getElementById("main").style.display = "none";
+  document.getElementById("finalMessage").style.display = "block";
+
+  // Musica
+  const music = document.getElementById("bgMusic");
+  music.currentTime = 44;
+  music.volume = 0.6;
+  music.play().catch(()=>{});
+
+  // Cuori
+  for(let i=0;i<60;i++){
+    let heart=document.createElement("div");
+    heart.className="heart";
+    heart.innerHTML="❤";
+    heart.style.left=Math.random()*100+"vw";
+    heart.style.animationDuration=(Math.random()*4+3)+"s";
+    heart.style.fontSize=(Math.random()*20+25)+"px";
+    document.body.appendChild(heart);
+  }
+}
+</script>
+
+</body>
+</html>
