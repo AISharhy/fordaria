@@ -21,15 +21,14 @@ body{
   overflow:hidden;
   position:relative;
   color:#fff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-               "Segoe UI", Roboto, Arial, sans-serif;
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+              "Segoe UI", Roboto, Arial, sans-serif;
 
-  /* Schermata iniziale opzionale */
-  background: url("sfondo.png") center/cover no-repeat;
+  background:url("sfondo.png") center/cover no-repeat;
   background-color:#000;
 }
 
-/* Overlay leggero: aiuta la leggibilità ma lascia visibili i video */
+/* Overlay leggero */
 body::before{
   content:"";
   position:fixed;
@@ -74,7 +73,6 @@ body::before{
   opacity:0;
   transition: opacity 1.2s ease;
 }
-
 .bg-carousel video.active{ opacity:1; }
 
 /* ====== CONTENUTI ====== */
@@ -96,7 +94,7 @@ body::before{
   text-align:center;
 }
 
-/* Testo CAPS: niente bordo nero, solo shadow morbida */
+/* Testo CAPS: niente bordo nero */
 .title{
   margin:0;
   width:92vw;
@@ -113,13 +111,7 @@ body::before{
     0 0 32px rgba(0,0,0,0.35);
 }
 
-.buttons{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  justify-content:center;
-}
-
+/* Bottoni */
 button{
   padding:16px 26px;
   font-size:18px;
@@ -139,15 +131,34 @@ button{
   background:#ff0055;
   color:#fff;
   box-shadow:0 0 24px rgba(255,0,85,.70);
+  transition: transform .25s ease, box-shadow .25s ease;
 }
 
 .no-button{
+  position:absolute; /* scappa */
   background:rgba(255,255,255,.14);
   color:#fff;
   border:1px solid rgba(255,255,255,.18);
 }
 
-/* Messaggio finale: solo testo, niente box */
+/* Contenitore bottoni con spazio per far scappare NO */
+.buttons{
+  position:relative;
+  width:min(92vw, 520px);
+  height:140px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* posizione iniziale NO */
+.no-button{
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+}
+
+/* Messaggio finale */
 #finalMessage{ display:none; }
 
 .finalText{
@@ -208,6 +219,7 @@ button{
 <!-- INIZIO -->
 <div class="screen" id="main">
   <h2 class="title">POSSO AVERE IL PRIVILEGIO DI CHIAMARTI AMORE MIO? 🥺💞</h2>
+
   <div class="buttons">
     <button class="yes-button" onclick="handleYesClick()">SÌ</button>
     <button class="no-button" onclick="handleNoClick()">NO</button>
@@ -224,11 +236,11 @@ button{
     È CASA. È BATTITO. È LUCE.<br><br>
     MI FAI EMOZIONARE.<br>
     MI REGALI SORRISI IMPROVVISI<br>
-    E UN AMORE CHE CRESCE OGNI GIORNO. <br><br>
+    E UN AMORE CHE CRESCE OGNI GIORNO.<br><br>
     PERCHÉ SCEGLIERTI…<br>
     È LA COSA PIÙ BELLA CHE POTESSI FARE.<br><br>
     E QUESTO, DARIA…<br>
-    È LA COSA PIÙ NATURALE PER ME. 
+    È LA COSA PIÙ NATURALE PER ME.
   </div>
 </div>
 
@@ -239,10 +251,9 @@ button{
 
 <script>
 /* ====== CONFIG ====== */
-/* ATTENZIONE: nomi con V MAIUSCOLA come nel tuo repo */
-const videos = ["video2.mp4","video3.mp4","video4.mp4"]; // cambia ordine se vuoi
-const MUSIC_START_AT = 44;     // secondi
-const SWITCH_EVERY_MS = 10000; // cambio video
+const videos = ["video2.mp4","video3.mp4","video4.mp4"]; // metti i nomi ESATTI dei tuoi file
+const MUSIC_START_AT = 44;
+const SWITCH_EVERY_MS = 10000;
 
 /* ====== VIDEO ELEMENTS ====== */
 const bgA = document.getElementById("bgA");
@@ -308,7 +319,6 @@ function startCarousel(){
     if(!timer) timer = setInterval(switchVideo, SWITCH_EVERY_MS);
   };
 
-  // fallback Safari
   setTimeout(() => {
     if(!active.fg.classList.contains("active")){
       setActive(active, true);
@@ -319,8 +329,10 @@ function startCarousel(){
   }, 1200);
 }
 
-/* ====== NO BUTTON ====== */
+/* ====== NO SCAPPA + SI CRESCE ====== */
 let messageIndex = 0;
+let scaleSize = 1;
+
 const messages = [
   "SEI SICURA? 😏",
   "DAVVERO VUOI DIRE DI NO? 😌",
@@ -329,6 +341,23 @@ const messages = [
   "LO SAPPIAMO ENTRAMBI 💕"
 ];
 
+function moveNoButton(){
+  const noButton = document.querySelector(".no-button");
+  const box = document.querySelector(".buttons");
+
+  const pad = 8;
+  const maxX = box.clientWidth - noButton.offsetWidth - pad;
+  const maxY = box.clientHeight - noButton.offsetHeight - pad;
+
+  const x = Math.max(pad, Math.random() * maxX);
+  const y = Math.max(pad, Math.random() * maxY);
+
+  noButton.style.left = x + "px";
+  noButton.style.top = y + "px";
+  noButton.style.right = "auto";
+  noButton.style.transform = "translate(0,0)";
+}
+
 function handleNoClick(){
   const noButton = document.querySelector(".no-button");
   const yesButton = document.querySelector(".yes-button");
@@ -336,29 +365,32 @@ function handleNoClick(){
   noButton.textContent = messages[messageIndex];
   messageIndex = (messageIndex + 1) % messages.length;
 
-  const current = parseFloat(getComputedStyle(yesButton).fontSize);
-  yesButton.style.fontSize = Math.min(current * 1.16, 34) + "px";
+  moveNoButton();
+
+  scaleSize += 0.18;
+  const s = Math.min(scaleSize, 2.6);
+  yesButton.style.transform = `scale(${s})`;
+  yesButton.style.boxShadow = `0 0 ${24*s}px rgba(255,0,85,0.85)`;
 }
+
+/* scappa prima del click (mobile + desktop) */
+document.querySelector(".no-button").addEventListener("touchstart", handleNoClick, { passive:true });
+document.querySelector(".no-button").addEventListener("mouseover", handleNoClick);
 
 /* ====== YES CLICK ====== */
 function handleYesClick(){
-  // togli sfondo immagine iniziale
   document.body.style.background = "#000";
 
-  // avvia video
   startCarousel();
 
-  // schermate
   document.getElementById("main").style.display = "none";
   document.getElementById("finalMessage").style.display = "flex";
 
-  // musica (parte dopo tap, ok iPhone)
   const music = document.getElementById("bgMusic");
   music.currentTime = MUSIC_START_AT;
   music.volume = 0.6;
   music.play().catch(()=>{});
 
-  // cuori
   for(let i=0;i<55;i++){
     const heart = document.createElement("div");
     heart.className = "heart";
@@ -371,7 +403,6 @@ function handleYesClick(){
     setTimeout(()=>heart.remove(), 12000);
   }
 
-  // extra-fallback: un tocco dopo avvia sempre (Safari)
   document.body.addEventListener("touchend", () => {
     forcePlay(active.bg);
     forcePlay(active.fg);
